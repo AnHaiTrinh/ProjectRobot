@@ -3,6 +3,7 @@ import pygame
 import time
 from pygame.locals import *
 from sortedcontainers import SortedList
+from PriorityQueue import PriorityQueue
 from AABB import Obstacle
 from Env import Environment, compute_path, show_path, draw_env_path, draw_path, draw_target, draw_local_goal
 from robot import Robot
@@ -106,11 +107,9 @@ while not finished:
     elif pause:
         continue
     else:
-        obstacles_list_before = obstacles_list
         for obstacle in obstacles_list:
             obstacle.move()
             obstacle.draw(screen)
-        obstacles_list_after = obstacles_list
         if env:
             changed, newPath = robot.updatePath(obstacles_list, priority_queue, env)
             if changed:
@@ -122,9 +121,6 @@ while not finished:
                 # spline = makeSpline(robot.pos, path, screen)
                 # local_goal = tuple(spline[500])
                 # local_goal = compute_local_path(path[1], end)
-
-            print(robot.decisionMaking(obstacles_list_before, obstacles_list_after, local_goal))
-
         if patience:
             robotX, robotY = robot.pos
             past_path.append(robot.pos)
