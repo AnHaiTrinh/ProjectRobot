@@ -50,13 +50,14 @@ class AABB:
 
 
 class Obstacle(AABB):
-    def __init__(self, x, y, width, height, static=False, x_bound=(10, 10), y_bound=(20, 20)):
+    def __init__(self, x, y, width, height, static, v, x_bound=(20, 20), y_bound=(20, 20)):
         super().__init__(x, y, width, height)
         self.static = static
-        if not static:
-            self.v = np.random.randn(2) * 2
-            self.x_bound = (x - x_bound[0], x + x_bound[1])
-            self.y_bound = (y - y_bound[0], y + y_bound[1])
+        self.v = np.array(v)
+        if self.static:
+            self.v = np.array([0, 0])
+        self.x_bound = (x - x_bound[0], x + x_bound[1])
+        self.y_bound = (y - y_bound[0], y + y_bound[1])
 
     def draw(self, window):
         pygame.draw.rect(window, BLACK, (self.x - self.width / 2, self.y - self.height / 2, self.width, self.height))
@@ -78,6 +79,9 @@ class Obstacle(AABB):
             elif self.y > self.y_bound[1]:
                 self.y = self.y_bound[1]
                 self.v = (v_x, -v_y)
+
+    def __str__(self):
+        return f"Obstacle({self.x}, {self.y}, {self.width}, {self.height}, {self.static}, [{self.v[0]}, {self.v[1]}])"
 
 
 class Node(AABB):

@@ -19,11 +19,13 @@ import pygame
 #     return spl
 
 
-def makeSpline(robotPos, path):
-    try:
+def makeSpline(robotPos, path, goal):
+    if len(path) > 2:
         x, y = np.array([p.x for p in path]), np.array([p.y for p in path])
         x[0] = robotPos[0]
         y[0] = robotPos[1]
+        x[-1] = goal[0]
+        y[-1] = goal[1]
         n = len(path)
         i = np.arange(n)
         interp_i = np.linspace(0, n - 1, n * 1000)
@@ -35,8 +37,7 @@ def makeSpline(robotPos, path):
         #     for k in range(n * 1000 - 1):
         #         pygame.draw.line(window, (0, 255, 0), (xs[k], ys[k]), (xs[k+1], ys[k+1]), 3)
         return np.array([xs, ys])
-    except:
-        print(1)
+    else:
         if type(path[-1]) == tuple:
             return np.array([np.linspace(robotPos[0], path[-1][0], 1000), np.linspace(robotPos[1], path[-1][1], 1000)])
         else:

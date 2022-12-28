@@ -124,8 +124,6 @@ def compute_path(queue, graph):
             for u in v.neighbors:
                 update_vertex(queue, graph, u)
         # if queue.is_empty():
-        if not queue:
-            break
 
 
 def update_vertex(queue, graph, vertex):
@@ -137,6 +135,7 @@ def update_vertex(queue, graph, vertex):
     if vertex.g != vertex.rhs:
         # queue.insert(vertex)
         queue.add(vertex)
+
 
 def compare_array(a, b):
     for i in range(max(len(a), len(b))):
@@ -152,9 +151,9 @@ def show_path(graph):
     path = [graph.current]
     current = graph.current
     while current != graph.goal:
-        cur_neighbors = current.neighbors
-        min_idx = np.argmin([v.g for v in cur_neighbors])
-        current = cur_neighbors[min_idx]
+        # cur_neighbors = current.neighbors
+        # min_idx = np.argmin([v.g for v in cur_neighbors])
+        current = min(current.neighbors, key=lambda x: x.g)
         path.append(current)
     return path
 
