@@ -6,10 +6,10 @@ import numpy as np
 from pygame.locals import *
 from sortedcontainers import SortedList
 from AABB import Obstacle
-from Env import Environment, compute_path, show_path, draw_path, draw_target, draw_local_goal
+from Env import Environment, compute_path, show_path, draw_path, draw_target, draw_local_goal, draw_env_path
 from robot import Robot
 from Spline import makeSpline, drawSpline
-from Obstacles import dense
+from Obstacles import dense2
 
 
 # env_width = int(input("Enter width: "))
@@ -31,7 +31,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
-PATIENCE = 30
+PATIENCE = 25
 
 # Initialization
 begin = (40, 500)
@@ -85,7 +85,7 @@ while not finished:
                 done = True
                 with open("Obstacles.py", 'a') as f:
                     f.write(",\n".join([o.__str__() for o in obstacles_list]))
-                obstacles_list = dense
+                obstacles_list = dense2
             elif button2.collidepoint(mouse_x, mouse_y):
                 pause = not pause
             elif button3.collidepoint(mouse_x, mouse_y):
@@ -144,23 +144,28 @@ while not finished:
                 path = robot.updatePath(obstacles_list, priority_queue, env)
                 print("Changed")
                 spl = makeSpline(robot.pos, path, end)
-                local_goal = tuple(spl[:, 0])
-                targets = 0
-
+                local_goal = tuple(spl[:, 300])
+                targets = 1
+            # p = robot.updatePath(obstacles_list, priority_queue, env)
+            # if p:
+            #     path = p
+            #     spl = makeSpline(robot.pos, path, end)
+            #     local_goal = tuple(spl[:, 300])
+            #     targets = 1
+            # robot.pos = robot.nextPosition(local_goal)
 
             # robot.move(local_goal)
             # local_path.append(robot.pos)
             if robot.reach(local_goal):
                 if local_goal == end:
                     finished = True
-                elif robot.reach((path[0].x, path[0].y)):
+                elif len(path) > 2 and robot.enter(path[1]):
                     path.pop(0)
                     env.current = path[0]
                 targets += 1
-                if len(path) > 2 and targets * 400 < spl.shape[1]:
-                    local_goal = tuple(spl[:, targets * 400])
+                if targets * 300 < spl.shape[1]:
+                    local_goal = tuple(spl[:, targets * 300])
                 else:
-                    path[-1] = end
                     local_goal = end
             patience += 1
             if patience == PATIENCE:
@@ -169,16 +174,17 @@ while not finished:
             env = Environment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
             env.update(obstacles_list)
             env.build_env(robot.pos, end)
-            priority_queue = SortedList(key=lambda x: x.calculate_key())
+            priority_queue = SortedList(key=lambda x: x.key)
             env.goal.rhs = 0
             # priority_queue.insert(env.goal)
+            env.goal.calculate_key()
             priority_queue.add(env.goal)
             compute_path(priority_queue, env)
             path = show_path(env)
             spl = makeSpline(robot.pos, path, end)
             targets = 0
-            if len(path) > 2 and targets * 400 < spl.shape[1]:
-                local_goal = tuple(spl[:, targets * 400])
+            if targets * 300 < spl.shape[1]:
+                local_goal = tuple(spl[:, targets * 300])
             else:
                 local_goal = end
             # if len(path) <= 2:
@@ -189,7 +195,7 @@ while not finished:
         draw_path(local_path, screen, BLUE)
         # draw_env_path(path, screen)
         drawSpline(spl, screen)
-        draw_local_goal(screen, local_goal)
+        # draw_local_goal(screen, local_goal)
         env.draw(screen, mode="boundary")
         draw_target(screen, (end[0] - 10, end[1] - 64))
         robot.draw(screen)

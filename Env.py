@@ -110,11 +110,13 @@ class Environment:
 def compute_path(queue, graph):
     # while ((not queue.is_empty()) and compare_array(queue.top_key(), graph.current.calculate_key())) or \
     #         (graph.current.g != graph.current.rhs):
-    while (queue and compare_array(queue[0].calculate_key(), graph.current.calculate_key())) or \
+    while (queue and compare_array(queue[0].key, graph.current.calculate_key())) or \
             (graph.current.g != graph.current.rhs):
-        # v = queue.pop()
         v = queue.pop(0)
-        if v.g > v.rhs:
+        k_old = v.key
+        if k_old < v.calculate_key():
+            queue.add(v)
+        elif v.g > v.rhs:
             v.g = v.rhs
             for u in v.neighbors:
                 update_vertex(queue, graph, u)
@@ -123,7 +125,6 @@ def compute_path(queue, graph):
             update_vertex(queue, graph, v)
             for u in v.neighbors:
                 update_vertex(queue, graph, u)
-        # if queue.is_empty():
 
 
 def update_vertex(queue, graph, vertex):
@@ -134,6 +135,7 @@ def update_vertex(queue, graph, vertex):
     queue.discard(vertex)
     if vertex.g != vertex.rhs:
         # queue.insert(vertex)
+        vertex.calculate_key()
         queue.add(vertex)
 
 

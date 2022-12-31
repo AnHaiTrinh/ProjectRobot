@@ -23,12 +23,12 @@ class Robot:
         goalX, goalY = goal
         return ((robotX - goalX) ** 2 + (robotY - goalY) ** 2) <= epsilon
 
-    def exit(self, node):
+    def enter(self, node):
         robotX, robotY = self.pos
         nodeX, nodeY, node_size = node.x, node.y, node.width
-        return np.abs(robotX - nodeX) > node_size / 2 and np.abs(robotY - nodeY) > node_size / 2
+        return np.abs(robotX - nodeX) <= node_size / 2 and np.abs(robotY - nodeY) <= node_size / 2
 
-    def updatePath(self, obstacles_list, priority_queue, env, threshold=1e-4):
+    def updatePath(self, obstacles_list, priority_queue, env, threshold=1e-2):
         changes = []
         obstacles = self.detect(obstacles_list)
         for n in env.current.neighbors:
@@ -40,10 +40,12 @@ class Robot:
                         changes.append(n)
                         n.value = 1
                     break
-            if n.value:
-                changes.append(n)
-            n.value = 0
-
+            if percentage < threshold:
+                if n.value:
+                    changes.append(n)
+                n.value = 0
+        # if not changes:
+        #     return None
         for change in changes:
             update_vertex(priority_queue, env, change)
             for n in change.neighbors:

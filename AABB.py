@@ -100,6 +100,7 @@ class Node(AABB):
         self.SE = None
         self.neighbors = []
         self.region = region
+        self.key = None
         self.start = False
         self.goal = False
 
@@ -368,11 +369,13 @@ class Node(AABB):
     def init(self):
         self.g = np.inf
         self.rhs = np.inf
+        self.key = [np.inf, np.inf]
         self.h = 0
         self.in_queue = False
 
     def calculate_key(self):
-        return [min(self.g, self.rhs) + self.h, min(self.g, self.rhs)]
+        self.key = [min(self.g, self.rhs) + self.h, min(self.g, self.rhs)]
+        return self.key
 
     def calculate_rhs(self):
         ans = min([(cost(self, neighbor) + neighbor.g) for neighbor in self.neighbors])
