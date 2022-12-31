@@ -334,21 +334,21 @@ while running:
             update_vertex(priority_queue, graph, graph.graph[i][j])
             for pred in graph.pred(graph.graph[i][j]):
                 update_vertex(priority_queue, graph, pred)
-        if changes:
-            for vertex in graph.succ(graph.current):
-                x, y = vertex.coordinate
-                if graph.grid[x][y] == 0:
-                    changes = []
-                    for v in graph.succ(vertex):
-                        i, j = v.coordinate
-                        if graph.grid[i][j] != real.grid[i][j]:
-                            changes.append((i, j))
-                    for change in changes:
-                        i, j = change
-                        graph.update_grid((i, j), real.grid[i][j])
-                        update_vertex(priority_queue, graph, graph.graph[i][j])
-                        for pred in graph.pred(graph.graph[i][j]):
-                            update_vertex(priority_queue, graph, pred)
+        # if changes:
+        #     for vertex in graph.succ(graph.current):
+        #         x, y = vertex.coordinate
+        #         if graph.grid[x][y] == 0:
+        #             changes = []
+        #             for v in graph.succ(vertex):
+        #                 i, j = v.coordinate
+        #                 if graph.grid[i][j] != real.grid[i][j]:
+        #                     changes.append((i, j))
+        #             for change in changes:
+        #                 i, j = change
+        #                 graph.update_grid((i, j), real.grid[i][j])
+        #                 update_vertex(priority_queue, graph, graph.graph[i][j])
+        #                 for pred in graph.pred(graph.graph[i][j]):
+        #                     update_vertex(priority_queue, graph, pred)
             compute_path(priority_queue, graph)
 
         draw_graph(real, top_lefts[0])

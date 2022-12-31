@@ -1,23 +1,23 @@
-import math
+import numpy as np
 
-ANGLE_F = 25
+ANGLE_F = 15
 ANGLE_DF = 35
 ANGLE_DS = 55
-ANGLE_S = 65
+ANGLE_S = 75
 
-DELTAD_A = 3
-DELTAD_UA = 2
-DELTAD_UC = -2
-DELTAD_C = -3
+DELTAD_A = 2.5
+DELTAD_UA = 1.5
+DELTAD_UC = -1.5
+DELTAD_C = -2.5
 
-DELTAPHI_A = 7
-DELTAPHI_LAA = 6
-DELTAPHI_LAU = 4
+DELTAPHI_A = 10
+DELTAPHI_LAA = 7
+DELTAPHI_LAU = 5
 DELTAPHI_ULA = 3
 DELTAPHI_ULC = -3
-DELTAPHI_LCU = -4
-DELTAPHI_LCC = -6
-DELTAPHI_C = -7
+DELTAPHI_LCU = -5
+DELTAPHI_LCC = -7
+DELTAPHI_C = -10
 
 
 def convertphi(phi):
@@ -143,7 +143,7 @@ def truthtable(phi, deltad, deltaphi):
 
 
 def fuzzyDecisionMaking(phit, phit_next, dt, dt_next):
-    phi = convertphi(phit / math.pi * 180)
-    deltaphi = convertdeltaphi((phit_next - phit) / math.pi * 180)
-    deltad = convertdeltad((dt_next - dt)/5)
+    phi = convertphi(phit / np.pi * 180)
+    deltaphi = convertdeltaphi((phit_next - phit) / np.pi * 180)
+    deltad = convertdeltad((dt_next - dt))
     return truthtable(phi, deltad, deltaphi)
