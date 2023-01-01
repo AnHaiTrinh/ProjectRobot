@@ -9,7 +9,7 @@ from AABB import Obstacle
 from Env import Environment, compute_path, show_path, draw_path, draw_target, draw_local_goal, draw_env_path
 from robot import Robot
 from Spline import makeSpline, drawSpline
-from Obstacles import dense2
+from Obstacles import *
 
 
 # env_width = int(input("Enter width: "))
@@ -85,7 +85,7 @@ while not finished:
                 done = True
                 with open("Obstacles.py", 'a') as f:
                     f.write(",\n".join([o.__str__() for o in obstacles_list]))
-                obstacles_list = dense2
+                obstacles_list = trap     ####################### Change environment
             elif button2.collidepoint(mouse_x, mouse_y):
                 pause = not pause
             elif button3.collidepoint(mouse_x, mouse_y):

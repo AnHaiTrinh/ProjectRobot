@@ -5,19 +5,19 @@ ANGLE_DF = 35
 ANGLE_DS = 55
 ANGLE_S = 75
 
-DELTAD_A = 2.5
-DELTAD_UA = 1.5
-DELTAD_UC = -1.5
-DELTAD_C = -2.5
+DELTAD_A = 2.0
+DELTAD_UA = 1.0
+DELTAD_UC = -1.0
+DELTAD_C = -2.0
 
-DELTAPHI_A = 10
-DELTAPHI_LAA = 7
-DELTAPHI_LAU = 5
+DELTAPHI_A = 7
+DELTAPHI_LAA = 6
+DELTAPHI_LAU = 4
 DELTAPHI_ULA = 3
 DELTAPHI_ULC = -3
-DELTAPHI_LCU = -5
-DELTAPHI_LCC = -7
-DELTAPHI_C = -10
+DELTAPHI_LCU = -4
+DELTAPHI_LCC = -6
+DELTAPHI_C = -7
 
 
 def convertphi(phi):
@@ -104,7 +104,7 @@ def convertdeltaphi(deltaphi):
 
 
 def truthtable(phi, deltad, deltaphi):
-    if deltad == "A" :
+    if deltad == "A":
         return "No"
     elif deltad == "U":
         if phi == "S":
@@ -115,22 +115,20 @@ def truthtable(phi, deltad, deltaphi):
             elif deltaphi == "U" or deltaphi == "LA" or deltaphi == "A":
                 return "No"
         elif phi == "F":
-            if deltaphi == "C" or deltaphi == "LC" or deltaphi == "U":
+            if deltaphi == "C" or deltaphi == "LC":
                 return "Stop"
-            elif deltaphi == "LA" or deltaphi == "A":
+            elif deltaphi == "LA" or deltaphi == "A" or deltaphi == "U":
                 return "No"
     elif deltad == "C":
         if phi == "S":
-            if deltaphi == "LC":
-                return "Stop"
-            elif deltaphi == "U":
+            if deltaphi == "LC" or deltaphi == "U":
                 return "Replan"
             elif deltaphi == "C" or deltaphi == "LA" or deltaphi == "A":
                 return "No"
         elif phi == "D":
-            if deltaphi == "C" or deltaphi == "LC":
+            if deltaphi == "C":
                 return "Stop"
-            elif deltaphi == "U":
+            elif deltaphi == "LC" or deltaphi == "U":
                 return "Replan"
             elif deltaphi == "LA" or deltaphi == "A":
                 return "No"

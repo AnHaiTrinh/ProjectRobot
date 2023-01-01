@@ -85,7 +85,7 @@ class Robot:
             if x1 == x2 and y1 == y2: continue
             print("_______________________")
             distance = np.sqrt((self.pos[0] - x1)*(self.pos[0] - x1) + (self.pos[1] - y1)*(self.pos[1] - y1))
-            if distance < self.r:
+            if distance < self.r + 10:
                 distance_next = np.sqrt((self.pos[0] - x2) * (self.pos[0] - x2) + (self.pos[1] - y2) * (self.pos[1] - y2))
                 rb_next = self.nextPosition(goal)
                 phi = angle(rb_next[0] - self.pos[0], rb_next[1] - self.pos[1], x1 - self.pos[0], y1 - self.pos[1])
