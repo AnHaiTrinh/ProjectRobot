@@ -301,12 +301,9 @@ while running:
                         if event.button == 1:
                             real.update_start((i, j))
                             graph.update_start((i, j), update_current=True)
-                            print("Start:", graph.start.coordinate)
-                            print("Current:", graph.current.coordinate)
                         if event.button == 3:
                             real.update_goal((i, j))
                             graph.update_goal((i, j))
-                            print("Goal:", graph.goal.coordinate)
                             priority_queue.insert(graph.goal)
                     if mode == "obstacles":
                         real.update_grid((i, j), 0)

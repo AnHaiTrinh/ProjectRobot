@@ -1,34 +1,33 @@
 import numpy as np
 import pygame
 from Env import compute_path, show_path, update_vertex
-from PSO import PSO
 from DecisionMaking import fuzzyDecisionMaking
 
 
 class Robot:
-    def __init__(self, start, v=10, r=30):
+    def __init__(self, start, v=10, r=40):
         self.pos = start
         self.v = v
         self.r = r
 
-    def move(self, goal):
-        # obstacles = self.detect(obs)
-        self.pos = PSO(20, 15, self.pos, goal)
+    # def move(self, goal, obs):
+    #     obstacles = self.detect(obs)
+    #     self.pos = tuple(PSO(50, 50, self.pos, goal, obstacles=obstacles))
 
     def draw(self, window):
-        pygame.draw.circle(window, (255, 0, 0), self.pos, 4, 0)
+        pygame.draw.circle(window, (255, 0, 0), self.pos, 2, 0)
         
-    def reach(self, goal, epsilon=4):
+    def reach(self, goal, epsilon=8):
         robotX, robotY = self.pos
         goalX, goalY = goal
-        return ((robotX - goalX) ** 2 + (robotY - goalY) ** 2) <= epsilon
+        return ((robotX - goalX) ** 2 + (robotY - goalY) ** 2) <= epsilon ** 2
 
     def enter(self, node):
         robotX, robotY = self.pos
         nodeX, nodeY, node_size = node.x, node.y, node.width
         return np.abs(robotX - nodeX) <= node_size / 2 and np.abs(robotY - nodeY) <= node_size / 2
 
-    def updatePath(self, obstacles_list, priority_queue, env, threshold=1e-2):
+    def updatePath(self, obstacles_list, priority_queue, env, threshold=1e-3):
         changes = []
         obstacles = self.detect(obstacles_list)
         for n in env.current.neighbors:
@@ -44,13 +43,10 @@ class Robot:
                 if n.value:
                     changes.append(n)
                 n.value = 0
-        # if not changes:
-        #     return None
         for change in changes:
             update_vertex(priority_queue, env, change)
             for n in change.neighbors:
                 update_vertex(priority_queue, env, n)
-
         compute_path(priority_queue, env)
         new_path = show_path(env)
         return new_path
@@ -76,6 +72,7 @@ class Robot:
         # return PSO(30, 25, self.pos, goal)
 
     def decisionMaking(self, obstacles_list_before, obstacles_list_after, goal):
+        self.deciosion_making.
         decision = "No"
         for i in range(len(obstacles_list_before)):
             x1 = obstacles_list_before[i].x
@@ -83,7 +80,10 @@ class Robot:
             x2 = obstacles_list_after[i].x
             y2 = obstacles_list_after[i].y
             if x1 == x2 and y1 == y2: continue
-            print("_______________________")
+            x1, y1 = min(obstacles_list_before[i].get_corners(),
+                         key=lambda x: (self.pos[0] - x[0]) ** 2 + (self.pos[1] - x[1]) ** 2)
+            x2, y2 = min(obstacles_list_after[i].get_corners(),
+                         key=lambda x: (self.pos[0] - x[0]) ** 2 + (self.pos[1] - x[1]) ** 2)
             distance = np.sqrt((self.pos[0] - x1)*(self.pos[0] - x1) + (self.pos[1] - y1)*(self.pos[1] - y1))
             if distance < self.r:
                 distance_next = np.sqrt((self.pos[0] - x2) * (self.pos[0] - x2) + (self.pos[1] - y2) * (self.pos[1] - y2))
@@ -100,3 +100,4 @@ class Robot:
 
 def angle(x1, y1, x2, y2):
     return np.arccos((x1 * x2 + y1 * y2) / (np.sqrt(x1 * x1 + y1 * y1) * np.sqrt(x2 * x2 + y2 * y2) +1e-6))
+
