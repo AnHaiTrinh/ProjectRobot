@@ -17,6 +17,10 @@ class AABB:
     def return_coordinate(self):  # return (top_left.x, bottom_right.x, top_left.y, bottom_right.y)
         return self.x - self.width / 2, self.x + self.width / 2, self.y - self.height / 2, self.y + self.height / 2
 
+    def get_corners(self):
+        return [(self.x - self.width / 2, self.y - self.height / 2), (self.x + self.width / 2, self.y - self.height / 2),
+                (self.x - self.width / 2, self.y + self.height / 2), (self.x + self.width / 2, self.y + self.height / 2)]
+
     def get_area(self):
         return self.width * self.height
 
@@ -87,10 +91,17 @@ class Obstacle(AABB):
 class Node(AABB):
     def __init__(self, x, y, width, height, parent=None, region=None):
         super().__init__(x, y, width, height)
-        self.in_queue = None
-        self.h = None
-        self.rhs = None
-        self.g = None
+        # Neighbor list
+        self.neighbors = []
+
+        # D* properties
+        self.in_queue = False
+        self.h = 0
+        self.rhs = np.inf
+        self.g = np.inf
+        self.key = [np.inf, np.inf]
+
+        # Determining neighbors and values for QuadTree
         self.parent = parent
         self.percentage = 0
         self.value = -1
@@ -98,9 +109,9 @@ class Node(AABB):
         self.NE = None
         self.SW = None
         self.SE = None
-        self.neighbors = []
         self.region = region
-        self.key = None
+
+        # Start / Goal indicators
         self.start = False
         self.goal = False
 
@@ -134,16 +145,16 @@ class Node(AABB):
             else:
                 self.value = 1
 
-    def update_percentage_and_split(self, obstacle, threshold_percentage=0.005, threshold_size=16):
-        intersect_percentage = self.get_intersect_percentage(obstacle)
-        self.percentage += intersect_percentage
+    def update_percentage_and_split(self, obstacles, threshold_percentage=0.005, threshold_size=16):
+        for obstacle in obstacles:
+            intersect_percentage = self.get_intersect_percentage(obstacle)
+            self.percentage += intersect_percentage
         self.set_value(threshold_percentage, threshold_size)
-        if intersect_percentage:
-            if self.value == -1:
-                if self.get_children() is None:
-                    self.split()
-                for child in self.get_children():
-                    child.update_percentage_and_split(obstacle)
+        if self.value == -1:
+            if self.get_children() is None:
+                self.split()
+            for child in self.get_children():
+                child.update_percentage_and_split(obstacles, threshold_percentage, threshold_size)
 
     def get_north_neighbor(self):
         if self.parent is None:
@@ -366,13 +377,6 @@ class Node(AABB):
             return [self]
         return self.NW.get_leaves() + self.NE.get_leaves() + self.SW.get_leaves() + self.SE.get_leaves()
 
-    def init(self):
-        self.g = np.inf
-        self.rhs = np.inf
-        self.key = [np.inf, np.inf]
-        self.h = 0
-        self.in_queue = False
-
     def calculate_key(self):
         self.key = [min(self.g, self.rhs) + self.h, min(self.g, self.rhs)]
         return self.key
@@ -392,4 +396,4 @@ def distance(node1, node2):
 
 
 def cost(node1, node2):
-    return distance(node1, node2) / (1 + 1e-6 - node1.value) * (1 + 1e-6 - node2.value)
+    return distance(node1, node2) / (1 + 1e-6 - min(1, node1.value * 100)) * (1 + 1e-6 - min(1, 100 * node2.value))
