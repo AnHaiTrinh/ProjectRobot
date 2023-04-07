@@ -72,7 +72,6 @@ class Robot:
         # return PSO(30, 25, self.pos, goal)
 
     def decisionMaking(self, obstacles_list_before, obstacles_list_after, goal):
-        self.deciosion_making.
         decision = "No"
         for i in range(len(obstacles_list_before)):
             x1 = obstacles_list_before[i].x
