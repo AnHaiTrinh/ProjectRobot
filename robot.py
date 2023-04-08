@@ -1,7 +1,7 @@
 import numpy as np
 import pygame
 from Env import compute_path, show_path, update_vertex
-from DecisionMaking import fuzzyDecisionMaking
+from FuzzyDecisionMaking import FuzzyDecisionMaking
 
 
 class Robot:
@@ -9,6 +9,7 @@ class Robot:
         self.pos = start
         self.v = v
         self.r = r
+        self.decisionControl = FuzzyDecisionMaking()
 
     # def move(self, goal, obs):
     #     obstacles = self.detect(obs)
@@ -72,31 +73,5 @@ class Robot:
         # return PSO(30, 25, self.pos, goal)
 
     def decisionMaking(self, obstacles_list_before, obstacles_list_after, goal):
-        decision = "No"
-        for i in range(len(obstacles_list_before)):
-            x1 = obstacles_list_before[i].x
-            y1 = obstacles_list_before[i].y
-            x2 = obstacles_list_after[i].x
-            y2 = obstacles_list_after[i].y
-            if x1 == x2 and y1 == y2: continue
-            x1, y1 = min(obstacles_list_before[i].get_corners(),
-                         key=lambda x: (self.pos[0] - x[0]) ** 2 + (self.pos[1] - x[1]) ** 2)
-            x2, y2 = min(obstacles_list_after[i].get_corners(),
-                         key=lambda x: (self.pos[0] - x[0]) ** 2 + (self.pos[1] - x[1]) ** 2)
-            distance = np.sqrt((self.pos[0] - x1)*(self.pos[0] - x1) + (self.pos[1] - y1)*(self.pos[1] - y1))
-            if distance < self.r:
-                distance_next = np.sqrt((self.pos[0] - x2) * (self.pos[0] - x2) + (self.pos[1] - y2) * (self.pos[1] - y2))
-                rb_next = self.nextPosition(goal)
-                phi = angle(rb_next[0] - self.pos[0], rb_next[1] - self.pos[1], x1 - self.pos[0], y1 - self.pos[1])
-                phi_next = angle(rb_next[0] - self.pos[0], rb_next[1] - self.pos[1], x2 - self.pos[0], y2 - self.pos[1])
-                decision_temp = fuzzyDecisionMaking(phi, phi_next, distance, distance_next)
-                if decision_temp == "Replan":
-                    return decision_temp
-                elif decision_temp == "Stop":
-                    decision = decision_temp
-        return decision
-
-
-def angle(x1, y1, x2, y2):
-    return np.arccos((x1 * x2 + y1 * y2) / (np.sqrt(x1 * x1 + y1 * y1) * np.sqrt(x2 * x2 + y2 * y2) +1e-6))
-
+        self.decisionControl.update(obstacles_list_before, obstacles_list_after, goal)
+        return self.decisionControl.decisionMaking(self)

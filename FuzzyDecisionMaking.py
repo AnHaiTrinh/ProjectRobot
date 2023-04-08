@@ -20,6 +20,42 @@ DELTAPHI_LCC = -7
 DELTAPHI_C = -10
 
 
+class FuzzyDecisionMaking:
+    def __init__(self):
+        self.goal = None
+        self.obstacles_list_before = None
+        self.obstacles_list_after = None
+
+    def update(self, obstacles_list_before, obstacles_list_after, goal):
+        self.obstacles_list_before = obstacles_list_before
+        self.obstacles_list_after = obstacles_list_after
+        self.goal = goal
+    def decisionMaking(self, rb):
+        decision = "No"
+        for i in range(len(self.obstacles_list_before)):
+            x1 = self.obstacles_list_before[i].x
+            y1 = self.obstacles_list_before[i].y
+            x2 = self.obstacles_list_after[i].x
+            y2 = self.obstacles_list_after[i].y
+            if x1 == x2 and y1 == y2: continue
+            x1, y1 = min(self.obstacles_list_before[i].get_corners(),
+                         key=lambda x: (rb.pos[0] - x[0]) ** 2 + (rb.pos[1] - x[1]) ** 2)
+            x2, y2 = min(self.obstacles_list_after[i].get_corners(),
+                         key=lambda x: (rb.pos[0] - x[0]) ** 2 + (rb.pos[1] - x[1]) ** 2)
+            distance = np.sqrt((rb.pos[0] - x1)*(rb.pos[0] - x1) + (rb.pos[1] - y1)*(rb.pos[1] - y1))
+            if distance < rb.r:
+                distance_next = np.sqrt((rb.pos[0] - x2) * (rb.pos[0] - x2) + (rb.pos[1] - y2) * (rb.pos[1] - y2))
+                rb_next = rb.nextPosition(self.goal)
+                phi = angle(rb_next[0] - rb.pos[0], rb_next[1] - rb.pos[1], x1 - rb.pos[0], y1 - rb.pos[1])
+                phi_next = angle(rb_next[0] - rb.pos[0], rb_next[1] - rb.pos[1], x2 - rb.pos[0], y2 - rb.pos[1])
+                decision_temp = fuzzyDecisionMaking(phi, phi_next, distance, distance_next)
+                if decision_temp == "Replan":
+                    return decision_temp
+                elif decision_temp == "Stop":
+                    decision = decision_temp
+        return decision
+
+
 def convertphi(phi):
     aS, aD, aF = 0, 0, 0
     if phi > ANGLE_S:
@@ -147,3 +183,6 @@ def fuzzyDecisionMaking(phit, phit_next, dt, dt_next):
     deltaphi = convertdeltaphi((phit_next - phit) / np.pi * 180)
     deltad = convertdeltad((dt_next - dt))
     return truthtable(phi, deltad, deltaphi)
+
+def angle(x1, y1, x2, y2):
+    return np.arccos((x1 * x2 + y1 * y2) / (np.sqrt(x1 * x1 + y1 * y1) * np.sqrt(x2 * x2 + y2 * y2) +1e-6))

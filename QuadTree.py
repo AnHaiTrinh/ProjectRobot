@@ -231,5 +231,6 @@ with open("metrics", "a") as f:
     for i in range(1, len(past_path) - 1):
         count += 1
         smooth += angle(past_path[i - 1], past_path[i], past_path[i + 1])
-    f.write(map + ' Distance: ' + str(round(d, 4)) + ' Smooth: ' + str(round((smooth / count) * 180 / np.pi, 4)) +
-            ' Time: ' + str(round(end_time - start_time, 4)) + '\n')
+    # Write distance, smoothness and time of an execution to an output file
+    f.write(map + ' ' + str(round(d, 4)) + ' ' + str(round((smooth / count) * 180 / np.pi, 4)) +
+            ' ' + str(round(end_time - start_time, 4)) + '\n')
