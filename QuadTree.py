@@ -143,8 +143,8 @@ while not finished:
                 # Uncomment the next lines if A* is used
                 '''
                 # Choose env type
-                env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
-                # env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+                # env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+                env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
 
                 env.update(obstacles_list)
                 env.build_env(robot.pos, end)
@@ -192,10 +192,10 @@ while not finished:
                 patience = 0
         else:
             # Quadtree environment
-            # env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+            env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
 
             # Grid environment
-            env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+            # env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
             env.update(obstacles_list)
             env.build_env(robot.pos, end)
             priority_queue = SortedList(key=lambda x: x.key)
