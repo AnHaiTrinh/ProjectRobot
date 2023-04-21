@@ -1,26 +1,27 @@
 import numpy as np
 import pygame
 from FuzzyDecisionMaking import FuzzyDecisionMaking
+from OnlyReplanDecision import OnlyReplanDecision
 from Colors import *
 
-
 class Robot:
-    def __init__(self, start, solver=None, r=30):
+    def __init__(self, start, r=40):
         self.pos = start
-        self.solver = solver
         self.r = r
         self.decisionControl = FuzzyDecisionMaking()
+        self.onlyReplan = OnlyReplanDecision()
 
     # def move(self, goal, obs):
     #     obstacles = self.detect(obs)
     #     self.pos = tuple(PSO(50, 50, self.pos, goal, obstacles=obstacles))
 
-    def draw(self, window):
-        # draw the sensor range
-        pygame.draw.rect(window,
-                         LIGHT_BLUE,
-                         (self.pos[0] - self.r / 2, self.pos[1] - self.r / 2, self.r, self.r),
-                         2)
+    def draw(self, window, draw_sr=False):
+        if draw_sr:
+            # draw the sensor range
+            pygame.draw.rect(window,
+                             LIGHT_BLUE,
+                             (self.pos[0] - self.r / 2, self.pos[1] - self.r / 2, self.r, self.r),
+                             2)
         # draw the robot
         pygame.draw.circle(window, RED, self.pos, 2, 0)
         
@@ -81,6 +82,9 @@ class Robot:
     def decisionMaking(self, obstacles_list_before, obstacles_list_after, goal):
         self.decisionControl.update(obstacles_list_before, obstacles_list_after, goal)
         return self.decisionControl.decisionMaking(self)
+
+        # self.onlyReplan.update(obstacles_list_before, obstacles_list_after, goal)
+        # return self.onlyReplan.decisionMaking(self)
 
     def set_solver(self, solver):
         self.solver = solver

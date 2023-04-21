@@ -138,7 +138,7 @@ while not finished:
             if (len(past_path) == 0) or robot.pos != past_path[-1]:
                 past_path.append(robot.pos)
             decision = robot.decisionMaking(obstacles_list_before, obstacles_list_after, local_goal)
-            print(decision)
+            # print(decision)
             if decision == "Replan":
                 # Uncomment the next lines if A* is used
                 '''
@@ -191,10 +191,10 @@ while not finished:
             if patience == PATIENCE:
                 patience = 0
         else:
-            # Quadtree environment
+            #Quadtree
             env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
 
-            # Grid environment
+            #Grid
             # env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
             env.update(obstacles_list)
             env.build_env(robot.pos, end)
@@ -219,7 +219,7 @@ while not finished:
         # draw_env_path(path, screen, robot.pos, end, draw_robot=False)
         drawSpline(spl, screen)
         # draw_local_goal(screen, local_goal)
-        env.draw(screen, mode="full")
+        env.draw(screen, mode="boundary")
         draw_target(screen, (end[0] - 10, end[1] - 64))
         robot.draw(screen)
         if robot.reach(end):
@@ -236,7 +236,7 @@ def angle(p1, p2, p3):
     return np.pi - np.arccos(a)
 
 
-with open("metrics", "a") as f:
+with open("comparison", "a") as f:
     d = 0
     for i in range(1, len(past_path)):
         d += np.sqrt(np.sum(np.square(np.array(past_path[i-1]) - np.array(past_path[i]))))
@@ -245,5 +245,6 @@ with open("metrics", "a") as f:
         count += 1
         smooth += angle(past_path[i - 1], past_path[i], past_path[i + 1])
     # Write distance, smoothness and time of an execution to an output file
-    f.write(map + ' ' + str(round(d, 4)) + ' ' + str(round((smooth / count) * 180 / np.pi, 4)) +
-            ' ' + str(round(end_time - start_time, 4)) + '\n')
+    # f.write(map + ' ' + str(round(d, 4)) + ' ' + str(round((smooth / count) * 180 / np.pi, 4)) +
+    #         ' ' + str(round(end_time - start_time, 4)) + '\n')
+    f.write(f"{map}: {round(d, 4)} {round((smooth / count) * 180 / np.pi, 4)} {round(end_time - start_time, 4)} \n")
