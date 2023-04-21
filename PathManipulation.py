@@ -1,6 +1,7 @@
 from scipy import interpolate
 import numpy as np
 import pygame
+from Colors import *
 
 # def make_spline(x_ys):
 #     # x_ys = np.array([[0, 1, 1, 2, 3, 4, 5, 7], [1, 2, 3, 5, 5.5, 7, 7, 8.5]])
@@ -43,4 +44,38 @@ def makeSpline(robotPos, path, goal):
 
 def drawSpline(spl, window):
     for i in range(spl.shape[1] - 1):
-        pygame.draw.line(window, (0, 255, 0), (spl[0][i], spl[1][i]), (spl[0][i+1], spl[1][i+1]), 3)
+        pygame.draw.line(window, GREEN, (spl[0][i], spl[1][i]), (spl[0][i+1], spl[1][i+1]), 3)
+
+
+def draw_env_path(path, window, start, end, draw_robot=True):
+    n = len(path)
+    if n:
+        # path = np.array([[p.x for p in path], [p.y for p in path]])
+        if type(path[-1]) == tuple:
+            pygame.draw.line(window, GREEN, (path[0].x, path[0].y), path[-1], 3)
+        else:
+            for i in range(n - 1):
+                start_pos = (path[i].x, path[i].y) if i else start
+                end_pos = (path[i + 1].x, path[i + 1].y) if i < n - 2 else end
+                pygame.draw.line(window, GREEN, start_pos, end_pos, 3)
+        if draw_robot:
+            path[0].draw(window)
+            if n > 1 and type(path[1]) != tuple:
+                path[1].draw(window)
+
+
+def draw_path(path, window, color):
+    n = len(path)
+    for i in range(n - 1):
+        start_pos = (path[i][0], path[i][1])
+        end_pos = (path[i + 1][0], path[i + 1][1])
+        pygame.draw.line(window, color, start_pos, end_pos, 3)
+
+
+def draw_target(window, target):
+    target_img = pygame.image.load('flag.png')
+    window.blit(target_img, target)
+
+
+def draw_local_goal(window, local_goal):
+    pygame.draw.circle(window, (255, 0, 0), local_goal, 2.5)

@@ -5,9 +5,11 @@ import time
 import numpy as np
 from pygame.locals import *
 from sortedcontainers import SortedList
-from Env import QuadTreeEnvironment, GridEnvironment, compute_path, show_path, draw_path, draw_target, draw_env_path
+from Env import QuadTreeEnvironment, GridEnvironment
 from robot import Robot
-from Spline import makeSpline, drawSpline
+from PathManipulation import makeSpline, drawSpline, draw_path, draw_target
+from Colors import *
+from Solver import DStarLiteSolver
 from Obstacles import *
 
 
@@ -27,12 +29,6 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
 pygame.display.set_caption("Quadtree Simulation")
 my_font = pygame.font.SysFont(None, SOUTH_PAD // 4)
 
-# Set up the colors.
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
-WHITE = (255, 255, 255)
 PATIENCE = 30
 
 # Initialization
@@ -144,8 +140,7 @@ while not finished:
             decision = robot.decisionMaking(obstacles_list_before, obstacles_list_after, local_goal)
             print(decision)
             if decision == "Replan":
-                path = robot.updatePath(obstacles_list, priority_queue, env)
-                # print("Changed")
+                path = robot.updatePath(obstacles_list)
                 spl = makeSpline(robot.pos, path, end)
                 local_goal = tuple(spl[:, 200])
                 targets = 1
@@ -181,8 +176,8 @@ while not finished:
             if patience == PATIENCE:
                 patience = 0
         else:
-            # env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
-            env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+            env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+            # env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
             env.update(obstacles_list)
             env.build_env(robot.pos, end)
             priority_queue = SortedList(key=lambda x: x.key)
@@ -190,8 +185,10 @@ while not finished:
             # priority_queue.insert(env.goal)
             env.goal.calculate_key()
             priority_queue.add(env.goal)
-            compute_path(priority_queue, env)
-            path = show_path(env)
+            # compute_path(priority_queue, env)
+            # path = show_path(env)
+            robot.set_solver(DStarLiteSolver(priority_queue, env))
+            path = robot.show_path()
             spl = makeSpline(robot.pos, path, end)
             targets = 1
             if targets * 200 < spl.shape[1]:
@@ -207,7 +204,7 @@ while not finished:
         # draw_env_path(path, screen, robot.pos, end, draw_robot=False)
         drawSpline(spl, screen)
         # draw_local_goal(screen, local_goal)
-        env.draw(screen, mode="boundary")
+        env.draw(screen, mode="full")
         draw_target(screen, (end[0] - 10, end[1] - 64))
         robot.draw(screen)
         if robot.reach(end):
@@ -216,6 +213,7 @@ while not finished:
     pygame.display.update()
 
 end_time = time.time()
+
 
 def angle(p1, p2, p3):
     l = np.sqrt(((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) * ((p3[0] - p2[0]) ** 2 + (p3[1] - p2[1]) ** 2))

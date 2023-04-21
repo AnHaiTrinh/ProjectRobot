@@ -3,14 +3,7 @@ import numpy as np
 from AABB import Node
 import pygame
 from itertools import chain
-
-# Set up the colors.
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-WHITE = (255, 255, 255)
-
-pygame.init()
-my_font = pygame.font.SysFont(None, 20)
+from Colors import *
 
 # class EnvNode:
 #     def __init__(self, node, g=inf, rhs=inf):
@@ -96,6 +89,7 @@ class QuadTreeEnvironment(Environment):
         for leaf in self.root.get_leaves():
             leaf.update_neighbors()
             nodes.append(leaf)
+            leaf.h = np.sqrt(np.square(leaf.x - self.goal.x) + np.square(leaf.y - self.goal.y))
         self.nodes = nodes
         self.current = self.start
 
@@ -140,6 +134,10 @@ class GridEnvironment(Environment):
                             self.cell_width,
                             self.cell_height) for j in range(size)] for i in range(size)]
 
+        for r in range(self.size):
+            for c in range(self.size):
+                node = self.nodes[r][c].h
+                node.h = np.sqrt(np.square(node.x - self.goal.x) + np.square(node.y - self.goal.y))
 
     def update(self, obstacles):
         for obstacle in obstacles:
@@ -168,87 +166,4 @@ class GridEnvironment(Environment):
                     n_x, n_y = i + dx, j + dy
                     if 0 <= n_x < self.size and 0 <= n_y < self.size:
                         node.neighbors.append(self.nodes[n_x][n_y])
-
-
-def compute_path(queue, graph):
-    # while ((not queue.is_empty()) and compare_array(queue.top_key(), graph.current.calculate_key())) or \
-    #         (graph.current.g != graph.current.rhs):
-    while (queue and compare_array(queue[0].key, graph.current.calculate_key())) or (graph.current.g != graph.current.rhs):
-        v = queue.pop(0)
-        if v.g > v.rhs:
-            v.g = v.rhs
-            for u in v.neighbors:
-                update_vertex(queue, graph, u)
-        else:
-            v.g = np.inf
-            update_vertex(queue, graph, v)
-            for u in v.neighbors:
-                update_vertex(queue, graph, u)
-
-
-def update_vertex(queue, graph, vertex):
-    if vertex != graph.goal:
-        vertex.calculate_rhs()
-    # if vertex.in_queue:
-    #     queue.remove(vertex)
-    queue.discard(vertex)
-    if vertex.g != vertex.rhs:
-        # queue.insert(vertex)
-        vertex.calculate_key()
-        queue.add(vertex)
-
-
-def compare_array(a, b):
-    for i in range(max(len(a), len(b))):
-        if i > len(b):
-            return False
-        if a[i] < b[i]:
-            return True
-        elif a[i] > b[i]:
-            return False
-
-
-def show_path(graph):
-    path = [graph.current]
-    current = graph.current
-    while current != graph.goal:
-        # cur_neighbors = current.neighbors
-        # min_idx = np.argmin([v.g for v in cur_neighbors])
-        current = min(current.neighbors, key=lambda x: x.g)
-        path.append(current)
-    return path
-
- 
-def draw_env_path(path, window, start, end, draw_robot=True):
-    n = len(path)
-    if n:
-        # path = np.array([[p.x for p in path], [p.y for p in path]])
-        if type(path[-1]) == tuple:
-            pygame.draw.line(window, GREEN, (path[0].x, path[0].y), path[-1], 3)
-        else:
-            for i in range(n - 1):
-                start_pos = (path[i].x, path[i].y) if i else start
-                end_pos = (path[i + 1].x, path[i + 1].y) if i < n - 2 else end
-                pygame.draw.line(window, GREEN, start_pos, end_pos, 3)
-        if draw_robot:
-            path[0].draw(window)
-            if n > 1 and type(path[1]) != tuple:
-                path[1].draw(window)
-
-
-def draw_path(path, window, color):
-    n = len(path)
-    for i in range(n - 1):
-        start_pos = (path[i][0], path[i][1])
-        end_pos = (path[i + 1][0], path[i + 1][1])
-        pygame.draw.line(window, color, start_pos, end_pos, 3)
-
-
-def draw_target(window, target):
-    target_img = pygame.image.load('flag.png')
-    window.blit(target_img, target)
-
-
-def draw_local_goal(window, local_goal):
-    pygame.draw.circle(window, (255, 0, 0), local_goal, 2.5)
 

@@ -1,13 +1,13 @@
 import numpy as np
 import pygame
-from Env import compute_path, show_path, update_vertex
 from FuzzyDecisionMaking import FuzzyDecisionMaking
+from Colors import *
 
 
 class Robot:
-    def __init__(self, start, v=10, r=40):
+    def __init__(self, start, solver=None, r=30):
         self.pos = start
-        self.v = v
+        self.solver = solver
         self.r = r
         self.decisionControl = FuzzyDecisionMaking()
 
@@ -16,7 +16,13 @@ class Robot:
     #     self.pos = tuple(PSO(50, 50, self.pos, goal, obstacles=obstacles))
 
     def draw(self, window):
-        pygame.draw.circle(window, (255, 0, 0), self.pos, 2, 0)
+        # draw the sensor range
+        pygame.draw.rect(window,
+                         LIGHT_BLUE,
+                         (self.pos[0] - self.r / 2, self.pos[1] - self.r / 2, self.r, self.r),
+                         2)
+        # draw the robot
+        pygame.draw.circle(window, RED, self.pos, 2, 0)
         
     def reach(self, goal, epsilon=8):
         robotX, robotY = self.pos
@@ -28,29 +34,29 @@ class Robot:
         nodeX, nodeY, node_size = node.x, node.y, node.width
         return np.abs(robotX - nodeX) <= node_size / 2 and np.abs(robotY - nodeY) <= node_size / 2
 
-    def updatePath(self, obstacles_list, priority_queue, env, threshold=1e-3):
-        changes = []
+    def updatePath(self, obstacles_list):
         obstacles = self.detect(obstacles_list)
-        for n in env.current.neighbors:
-            percentage = 0
-            for obstacle in obstacles:
-                percentage += n.get_intersect_percentage(obstacle)
-                if percentage >= threshold:
-                    if n.value != 1:
-                        changes.append(n)
-                        n.value = 1
-                    break
-            if percentage < threshold:
-                if n.value:
-                    changes.append(n)
-                n.value = 0
-        for change in changes:
-            update_vertex(priority_queue, env, change)
-            for n in change.neighbors:
-                update_vertex(priority_queue, env, n)
-        compute_path(priority_queue, env)
-        new_path = show_path(env)
-        return new_path
+        # for n in env.current.neighbors:
+        #     percentage = 0
+        #     for obstacle in obstacles:
+        #         percentage += n.get_intersect_percentage(obstacle)
+        #         if percentage >= threshold:
+        #             if n.value != 1:
+        #                 changes.append(n)
+        #                 n.value = 1
+        #             break
+        #     if percentage < threshold:
+        #         if n.value:
+        #             changes.append(n)
+        #         n.value = 0
+        # for change in changes:
+        #     update_vertex(priority_queue, env, change)
+        #     for n in change.neighbors:
+        #         update_vertex(priority_queue, env, n)
+        # compute_path(priority_queue, env)
+        # new_path = show_path(env)
+        # return new_path
+        return self.solver.replan_path(obstacles)
 
     def detect(self, obstacles_list):
         obstacles = []
@@ -75,3 +81,9 @@ class Robot:
     def decisionMaking(self, obstacles_list_before, obstacles_list_after, goal):
         self.decisionControl.update(obstacles_list_before, obstacles_list_after, goal)
         return self.decisionControl.decisionMaking(self)
+
+    def set_solver(self, solver):
+        self.solver = solver
+
+    def show_path(self):
+        return self.solver.show_path()
