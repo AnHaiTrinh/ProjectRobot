@@ -1,9 +1,9 @@
 import numpy as np
 
-ANGLE_F = 15
+ANGLE_F = 25
 ANGLE_DF = 35
 ANGLE_DS = 55
-ANGLE_S = 75
+ANGLE_S = 65
 
 DELTAD_A = 2.5
 DELTAD_UA = 1.5

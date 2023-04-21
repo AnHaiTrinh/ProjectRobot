@@ -2,14 +2,15 @@ import numpy as np
 import pygame
 from Env import compute_path, show_path, update_vertex
 from FuzzyDecisionMaking import FuzzyDecisionMaking
+from OnlyReplanDecision import OnlyReplanDecision
 
 
 class Robot:
-    def __init__(self, start, v=10, r=40):
+    def __init__(self, start, r=40):
         self.pos = start
-        self.v = v
         self.r = r
         self.decisionControl = FuzzyDecisionMaking()
+        self.onlyReplan = OnlyReplanDecision()
 
     # def move(self, goal, obs):
     #     obstacles = self.detect(obs)
@@ -75,3 +76,6 @@ class Robot:
     def decisionMaking(self, obstacles_list_before, obstacles_list_after, goal):
         self.decisionControl.update(obstacles_list_before, obstacles_list_after, goal)
         return self.decisionControl.decisionMaking(self)
+
+        # self.onlyReplan.update(obstacles_list_before, obstacles_list_after, goal)
+        # return self.onlyReplan.decisionMaking(self)
