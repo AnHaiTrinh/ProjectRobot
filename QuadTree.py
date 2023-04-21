@@ -9,7 +9,7 @@ from Env import QuadTreeEnvironment, GridEnvironment
 from robot import Robot
 from PathManipulation import makeSpline, drawSpline, draw_path, draw_target
 from Colors import *
-from Solver import DStarLiteSolver
+from Solver import DStarLiteSolver, AStarSolver
 from Obstacles import *
 
 
@@ -140,6 +140,21 @@ while not finished:
             decision = robot.decisionMaking(obstacles_list_before, obstacles_list_after, local_goal)
             print(decision)
             if decision == "Replan":
+                # Uncomment the next lines if A* is used
+                '''
+                # Choose env type
+                env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+                # env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+
+                env.update(obstacles_list)
+                env.build_env(robot.pos, end)
+                priority_queue = SortedList(key=lambda x: x.key)
+                env.goal.rhs = 0
+                env.goal.calculate_key()
+                priority_queue.add(env.goal)
+                robot.set_solver(AStarSolver(priority_queue, env))
+                '''
+
                 path = robot.updatePath(obstacles_list)
                 spl = makeSpline(robot.pos, path, end)
                 local_goal = tuple(spl[:, 200])
@@ -176,17 +191,17 @@ while not finished:
             if patience == PATIENCE:
                 patience = 0
         else:
-            env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
-            # env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+            # Quadtree environment
+            # env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+
+            # Grid environment
+            env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
             env.update(obstacles_list)
             env.build_env(robot.pos, end)
             priority_queue = SortedList(key=lambda x: x.key)
             env.goal.rhs = 0
-            # priority_queue.insert(env.goal)
             env.goal.calculate_key()
             priority_queue.add(env.goal)
-            # compute_path(priority_queue, env)
-            # path = show_path(env)
             robot.set_solver(DStarLiteSolver(priority_queue, env))
             path = robot.show_path()
             spl = makeSpline(robot.pos, path, end)

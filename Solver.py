@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
+from AABB import cost
 
 
 class PriorityQueueSolver(ABC):
@@ -19,16 +20,9 @@ class PriorityQueueSolver(ABC):
     def replan_path(self, obstacles):
         pass
 
+    @abstractmethod
     def show_path(self):
-        self.compute_path()
-        path = [self.graph.current]
-        current = self.graph.current
-        while current != self.graph.goal:
-            # cur_neighbors = current.neighbors
-            # min_idx = np.argmin([v.g for v in cur_neighbors])
-            current = min(current.neighbors, key=lambda x: x.g)
-            path.append(current)
-        return path
+        pass
 
 
 class DStarLiteSolver(PriorityQueueSolver):
@@ -45,6 +39,15 @@ class DStarLiteSolver(PriorityQueueSolver):
                 self.update_vertex(v)
                 for u in v.neighbors:
                     self.update_vertex(u)
+
+    def show_path(self):
+        self.compute_path()
+        path = [self.graph.current]
+        current = self.graph.current
+        while current != self.graph.goal:
+            current = min(current.neighbors, key=lambda x: x.g)
+            path.append(current)
+        return path
 
     def update_vertex(self, vertex):
         if vertex != self.graph.goal:
@@ -83,18 +86,28 @@ class AStarSolver(PriorityQueueSolver):
         visited = set()
         while self.queue:
             v = self.queue.pop(0)
-            if v == self.env.current:
+            if v == self.graph.current:
                 break
-            coordinate = (v.x, v.y)
-            if coordinate in visited:
-                continue
-            visited.add(coordinate)
+            visited.add((v.x, v.y))
             for u in v.neighbors:
-                self.update_vertex(u)
+                if (u.x, u.y) not in visited:
+                    self.queue.discard(u)
+                    u.rhs = min(u.rhs, v.rhs + cost(u, v))
+                    u.calculate_key()
+                    self.queue.add(u)
 
     def update_vertex(self, vertex):
         pass
 
+    def show_path(self):
+        self.compute_path()
+        path = [self.graph.current]
+        current = self.graph.current
+        while current != self.graph.goal:
+            current = min(current.neighbors, key=lambda x: x.rhs)
+            path.append(current)
+        return path
+
     def replan_path(self, obstacles):
-        pass
+        return self.show_path()
 

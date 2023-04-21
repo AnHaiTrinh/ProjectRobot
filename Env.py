@@ -5,6 +5,7 @@ import pygame
 from itertools import chain
 from Colors import *
 
+
 # class EnvNode:
 #     def __init__(self, node, g=inf, rhs=inf):
 #         self.x = node.x
@@ -66,8 +67,8 @@ class Environment(ABC):
                 #     goal_rect = goal_text.get_rect(center=tuple([node.x, node.y]))
                 #     window.blit(goal_text, goal_rect)
                 node.draw(window)
-                for neighbor in node.neighbors:
-                   pygame.draw.line(window, GREEN, (node.x, node.y), (neighbor.x, neighbor.y))
+                # for neighbor in node.neighbors:
+                #    pygame.draw.line(window, GREEN, (node.x, node.y), (neighbor.x, neighbor.y))
         if mode == 'boundary':
             self.root.draw(window)
         if mode == 'none':
@@ -134,25 +135,22 @@ class GridEnvironment(Environment):
                             self.cell_width,
                             self.cell_height) for j in range(size)] for i in range(size)]
 
-        for r in range(self.size):
-            for c in range(self.size):
-                node = self.nodes[r][c].h
-                node.h = np.sqrt(np.square(node.x - self.goal.x) + np.square(node.y - self.goal.y))
-
     def update(self, obstacles):
         for obstacle in obstacles:
             x1, x2, y1, y2 = obstacle.return_coordinate()
-            lb_x, ub_x = int((x1 - self.left_pad) / self.cell_width), int((x2 - self.left_pad) / self.cell_width)
-            lb_y, ub_y = int((y1 - self.north_pad) / self.cell_height), int((y2 - self.north_pad) / self.cell_height)
-            for r in range(lb_y, ub_y + 1):
-                for c in range(lb_x, ub_x + 1):
+            lb_x, ub_x = int((x1 - self.left_pad) / self.cell_width), int(np.ceil((x2 - self.left_pad) / self.cell_width))
+            lb_y, ub_y = int((y1 - self.north_pad) / self.cell_height), int(np.ceil((y2 - self.north_pad) / self.cell_height))
+            for r in range(lb_y, ub_y):
+                for c in range(lb_x, ub_x):
                     self.nodes[r][c].value = 1
 
     def build_env(self, start, goal):
-        start_x, start_y = int((start[0] - self.left_pad) / self.cell_width), int((start[1] - self.north_pad) / self.cell_height)
+        start_x, start_y = int((start[0] - self.left_pad) / self.cell_width), int(
+            (start[1] - self.north_pad) / self.cell_height)
         self.start = self.nodes[start_y][start_x]
 
-        end_x, end_y = int((goal[0] - self.left_pad)/ self.cell_width), int((goal[1] - self.north_pad) / self.cell_height)
+        end_x, end_y = int((goal[0] - self.left_pad) / self.cell_width), int(
+            (goal[1] - self.north_pad) / self.cell_height)
         self.goal = self.nodes[end_y][end_x]
 
         self.current = self.start
@@ -160,10 +158,10 @@ class GridEnvironment(Environment):
         for i in range(self.size):
             for j in range(self.size):
                 node = self.nodes[i][j]
+                node.h = np.sqrt(np.square(node.x - self.goal.x) + np.square(node.y - self.goal.y))
                 if node.value == -1:
                     node.value = 0
                 for dx, dy in ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)):
                     n_x, n_y = i + dx, j + dy
                     if 0 <= n_x < self.size and 0 <= n_y < self.size:
                         node.neighbors.append(self.nodes[n_x][n_y])
-
