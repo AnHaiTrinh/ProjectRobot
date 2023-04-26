@@ -30,6 +30,7 @@ class FuzzyDecisionMaking:
         self.obstacles_list_before = obstacles_list_before
         self.obstacles_list_after = obstacles_list_after
         self.goal = goal
+
     def decisionMaking(self, rb):
         decision = "No"
         for i in range(len(self.obstacles_list_before)):

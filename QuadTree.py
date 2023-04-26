@@ -5,14 +5,25 @@ import time
 import numpy as np
 from pygame.locals import *
 from sortedcontainers import SortedList
-from Env import QuadTreeEnvironment, GridEnvironment, compute_path, show_path, draw_path, draw_target, draw_env_path
+from Env import QuadTreeEnvironment, GridEnvironment
 from robot import Robot
-from Spline import makeSpline, drawSpline
+from PathManipulation import makeSpline, drawSpline, draw_path, draw_target
+from Colors import *
+from Solver import DStarLiteSolver, AStarSolver
 from Obstacles import *
 
+# Dstar -> Astar: Uncomment line 150 and change line 208 (main algorithm using Dstar)
+# Astar -> Dstar: Comment line 150 and change line 208
 
-maps = {"trap": trap, "maze1": maze1, "maze2": maze2, "room1": room1, "room2": room2, "room3": room3, "dense1": dense1,
-        "dense2": dense2, "dense3": dense3, "test": test, "fake_room": fake_room, "trap2": trap2, "trap3": trap3}
+scenario = "trap"
+algorithm = "grid"
+
+maps = {"maze1": maze1, "maze2": maze2, "maze3": maze3, "maze4": maze4, "maze5": maze5, "maze6": maze6, "maze7": maze7, "maze8": maze8,
+         "maze9": maze9, "maze10": maze10, "room1": room1, "room2": room2, "room3": room3, "room4": room4, "room5": room5, "room6": room6,
+        "room7": room7, "room8": room8, "room9": room9, "room10": room10, "dense1": dense1,
+        "dense2": dense2, "dense3": dense3, "dense4": dense4, "dense5": dense5, "dense6": dense6, "dense7": dense7, "dense8": dense8, "dense9": dense9,
+        "dense10": dense10, "test": test, "fake_room": fake_room,"trap1": trap1, "trap2": trap2, "trap3": trap3, "trap4": trap4, "trap5": trap5,
+        "trap6": trap6, "trap7": trap7, "trap8": trap8, "trap9": trap9, "trap10": trap10}
 map = input("Enter map: ")
 # env_width = int(input("Enter width: "))
 # env_height = int(input("Enter height: "))
@@ -27,14 +38,6 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
 pygame.display.set_caption("Quadtree Simulation")
 my_font = pygame.font.SysFont(None, SOUTH_PAD // 4)
 
-# Set up the colors.
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
-WHITE = (255, 255, 255)
-
-#Frequency of global replan
 PATIENCE = 30
 
 # Initialization
@@ -146,8 +149,22 @@ while not finished:
             decision = robot.decisionMaking(obstacles_list_before, obstacles_list_after, local_goal)
             # print(decision)
             if decision == "Replan":
-                path = robot.updatePath(obstacles_list, priority_queue, env)
-                # print("Changed")
+                # Uncomment the next lines if A* is used
+
+                # Choose env type
+                # env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+                env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
+
+                env.update(obstacles_list)
+                env.build_env(robot.pos, end)
+                priority_queue = SortedList(key=lambda x: x.key)
+                env.goal.rhs = 0
+                env.goal.calculate_key()
+                priority_queue.add(env.goal)
+                robot.set_solver(AStarSolver(priority_queue, env))
+
+
+                path = robot.updatePath(obstacles_list)
                 spl = makeSpline(robot.pos, path, end)
                 local_goal = tuple(spl[:, 200])
                 targets = 1
@@ -192,11 +209,11 @@ while not finished:
             env.build_env(robot.pos, end)
             priority_queue = SortedList(key=lambda x: x.key)
             env.goal.rhs = 0
-            # priority_queue.insert(env.goal)
             env.goal.calculate_key()
             priority_queue.add(env.goal)
-            compute_path(priority_queue, env)
-            path = show_path(env)
+            #Change between A star and D star
+            robot.set_solver(AStarSolver(priority_queue, env))
+            path = robot.show_path()
             spl = makeSpline(robot.pos, path, end)
             targets = 1
             if targets * 200 < spl.shape[1]:
@@ -222,21 +239,22 @@ while not finished:
 
 end_time = time.time()
 
+
 def angle(p1, p2, p3):
     l = np.sqrt(((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) * ((p3[0] - p2[0]) ** 2 + (p3[1] - p2[1]) ** 2))
     a = max(((p1[0] - p2[0]) * (p3[0] - p2[0]) + (p1[1] - p2[1]) * (p3[1] - p2[1])) / l, -1)
     return np.pi - np.arccos(a)
 
 
-with open("comparison", "a") as f:
-    d = 0
-    for i in range(1, len(past_path)):
-        d += np.sqrt(np.sum(np.square(np.array(past_path[i-1]) - np.array(past_path[i]))))
-    count = smooth = 0
-    for i in range(1, len(past_path) - 1):
-        count += 1
-        smooth += angle(past_path[i - 1], past_path[i], past_path[i + 1])
-    # Write distance, smoothness and time of an execution to an output file
-    # f.write(map + ' ' + str(round(d, 4)) + ' ' + str(round((smooth / count) * 180 / np.pi, 4)) +
-    #         ' ' + str(round(end_time - start_time, 4)) + '\n')
-    f.write(f"{map}: {round(d, 4)} {round((smooth / count) * 180 / np.pi, 4)} {round(end_time - start_time, 4)} \n")
+# with open("result/" + scenario + "/" + algorithm, "a") as f:
+#     d = 0
+#     for i in range(1, len(past_path)):
+#         d += np.sqrt(np.sum(np.square(np.array(past_path[i-1]) - np.array(past_path[i]))))
+#     count = smooth = 0
+#     for i in range(1, len(past_path) - 1):
+#         count += 1
+#         smooth += angle(past_path[i - 1], past_path[i], past_path[i + 1])
+#     # Write distance, smoothness and time of an execution to an output file
+#     # f.write(map + ' ' + str(round(d, 4)) + ' ' + str(round((smooth / count) * 180 / np.pi, 4)) +
+#     #         ' ' + str(round(end_time - start_time, 4)) + '\n')
+#     f.write(f"{map}: {round(d, 4)} {round((smooth / count) * 180 / np.pi, 4)} {round(end_time - start_time, 4)} \n")
