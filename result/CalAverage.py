@@ -3,13 +3,13 @@ import os
 
 #Change directory if needed
 scenario = "room"
-allfile = os.listdir("C:/Users/ADMIN/Documents/GitHub/ProjectRobot/result/"+scenario)
+allfile = os.listdir(scenario)
 print(allfile)
 result_average = []
 result_variance = []
 
 for file in allfile:
-    with open("C:/Users/ADMIN/Documents/GitHub/ProjectRobot/result/"+scenario+"/"+file) as f:
+    with open(scenario+"/"+file) as f:
         result_temp = []
         flag = False
 

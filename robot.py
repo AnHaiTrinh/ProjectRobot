@@ -1,15 +1,15 @@
 import numpy as np
 import pygame
-from FuzzyDecisionMaking import FuzzyDecisionMaking
-from OnlyReplanDecision import OnlyReplanDecision
+from DecisionMaking import DecisionMaking
+from Solver import PriorityQueueSolver
 from Colors import *
 
 class Robot:
-    def __init__(self, start, r=40):
+    def __init__(self, start: tuple, solver: PriorityQueueSolver, decisionMaker: DecisionMaking, r=40):
         self.pos = start
         self.r = r
-        self.decisionControl = FuzzyDecisionMaking()
-        self.onlyReplan = OnlyReplanDecision()
+        self.solver = solver
+        self.decisionMaker = decisionMaker
 
     # def move(self, goal, obs):
     #     obstacles = self.detect(obs)
@@ -80,14 +80,11 @@ class Robot:
         # return PSO(30, 25, self.pos, goal)
 
     def decisionMaking(self, obstacles_list_before, obstacles_list_after, goal):
-        self.decisionControl.update(obstacles_list_before, obstacles_list_after, goal)
-        return self.decisionControl.decisionMaking(self)
+        self.decisionMaker.update(obstacles_list_before, obstacles_list_after, goal)
+        return self.decisionMaker.decisionMaking(self)
 
         # self.onlyReplan.update(obstacles_list_before, obstacles_list_after, goal)
         # return self.onlyReplan.decisionMaking(self)
-
-    def set_solver(self, solver):
-        self.solver = solver
 
     def show_path(self):
         return self.solver.show_path()
