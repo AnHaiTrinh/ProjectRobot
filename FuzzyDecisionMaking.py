@@ -142,7 +142,13 @@ def convertdeltaphi(deltaphi):
 
 def truthtable(phi, deltad, deltaphi):
     if deltad == "A" :
-        return "No"
+        if phi == "F":
+            if deltaphi == "C" or deltaphi == "LC" or deltaphi == "U":
+                return "Stop"
+            elif deltaphi == "LA" or deltaphi == "A":
+                return "No"
+        else:
+            return "No"
     elif deltad == "U":
         if phi == "S":
             return "No"
@@ -175,7 +181,7 @@ def truthtable(phi, deltad, deltaphi):
             if deltaphi == "C" or deltaphi == "LC" or deltaphi == "U":
                 return "Replan"
             elif deltaphi == "LA" or deltaphi == "A":
-                return "No"
+                return "Stop"
     return "No"
 
 
