@@ -1,35 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from AABB import Node
-import pygame
 from itertools import chain
-from Colors import *
-
-
-# class EnvNode:
-#     def __init__(self, node, g=inf, rhs=inf):
-#         self.x = node.x
-#         self.y = node.y
-#         self.width = node.width
-#         self.height = node.height
-#         self.value = node.value
-#         self.neighbors = node.neighbors
-#         self.g = g
-#         self.rhs = rhs
-#         self.h = 0
-#         self.in_queue = False
-# 
-#     def draw(self, window):
-#         pygame.draw.rect(window, BLACK, (self.x - self.width / 2, self.y - self.height / 2,
-#                                          self.width, self.height), 1 - self.value)
-#         # for neighbor in self.neighbors:
-#         #     pygame.draw.line(window, GREEN, (self.x, self.y), (neighbor.x, neighbor.y))
-# 
-#     def calculate_key(self):
-#         return [min(self.g, self.rhs) + self.h, min(self.g, self.rhs)]
-# 
-#     def calculate_rhs(self):
-#         return min([(cost(self, neighbor) + neighbor.g) for neighbor in self.neighbors])
 
 
 def my_iter(iterable):
