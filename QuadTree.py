@@ -165,7 +165,13 @@ def main(algorithm, scenario, test_map, interactive=True):
                 robotX, robotY = robot.pos
                 if (len(past_path) == 0) or robot.pos != past_path[-1]:
                     past_path.append(robot.pos)
+
+                # Decision making
+                decision_start = time.time()
                 decision = robot.decisionMaking(obstacles_list_before, obstacles_list_after, local_goal)
+                decision_end = time.time()
+                with open('action/' + scenario + '/' + algorithm, 'a') as f:
+                    f.write(f'{test_map} DECISION_MAKING {round(decision_end - decision_start, 4)}\n')
 
                 for i in obstacles_list_before:
                     if -i.width <= 2 * (robotX - i.x) <= i.width and -i.height <= 2 * (robotY - i.y) <= i.height:
@@ -174,7 +180,9 @@ def main(algorithm, scenario, test_map, interactive=True):
 
                 # print(decision)
                 if decision == "Replan":
+                    replan_start = time.time()
                     if planning_algo == 'Astar':
+                        build_start = time.time()
                         # Choose env type
                         if env_type == 'quadtree':
                             env = QuadTreeEnvironment(LEFT_PAD + env_width / 2,
@@ -193,11 +201,17 @@ def main(algorithm, scenario, test_map, interactive=True):
                         env.goal.calculate_key()
                         priority_queue.add(env.goal)
                         robot.solver = AStarSolver(priority_queue, env)
+                        build_end = time.time()
+                        with open('action/' + scenario + '/' + algorithm, 'a') as f:
+                            f.write(f'{test_map} ENV_DECOMPOSITION {round(build_end - build_start, 4)}\n')
 
                     path = robot.updatePath(obstacles_list)
                     spl = makeSpline(robot.pos, path, end)
                     local_goal = tuple(spl[:, 200])
                     targets = 1
+                    replan_end = time.time()
+                    with open('action/' + scenario + '/' + algorithm, 'a') as f:
+                        f.write(f'{test_map} LOCAL_REPLAN {round(replan_end - replan_start, 4)}\n')
                 if decision != "Stop":
                     robot.pos = robot.nextPosition(local_goal)
 
@@ -216,12 +230,20 @@ def main(algorithm, scenario, test_map, interactive=True):
                 if patience == PATIENCE:
                     patience = 0
             else:
+                # Environment decomposition
+                build_start = time.time()
                 if env_type == 'quadtree':
                     env = QuadTreeEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
                 elif env_type == 'grid':
                     env = GridEnvironment(LEFT_PAD + env_width / 2, NORTH_PAD + env_height / 2, env_width, env_height)
                 env.update(obstacles_list)
                 env.build_env(robot.pos, end)
+                build_end = time.time()
+                with open('action/' + scenario + '/' + algorithm, 'a') as f:
+                    f.write(f'{test_map} ENV_DECOMPOSITION {round(build_end - build_start, 4)}\n')
+
+                # Implementing path finding algorithm
+                algo_start = time.time()
                 priority_queue = SortedList(key=lambda x: x.key)
                 env.goal.rhs = 0
                 env.goal.calculate_key()
@@ -232,19 +254,23 @@ def main(algorithm, scenario, test_map, interactive=True):
                 elif planning_algo == 'Astar':
                     robot.solver = AStarSolver(priority_queue, env)
                 path = robot.show_path()
+                algo_end = time.time()
+                with open('action/' + scenario + '/' + algorithm, 'a') as f:
+                    f.write(f'{test_map} GLOBAL_PLANNING {round(algo_end - algo_start, 4)}\n')
+
+                # Smoothen the path using Spline
                 spl = makeSpline(robot.pos, path, end)
+
                 targets = 1
                 if targets * 200 < spl.shape[1]:
                     local_goal = tuple(spl[:, targets * 200])
                 else:
                     local_goal = end
-                # if len(path) <= 2:
-                #     local_goal = end
-                # local_path = []
                 patience += 1
+
             draw_path(past_path, screen, YELLOW)
             # draw_path(local_path, screen, BLUE)
-            # draw_env_path(path, screen, robot.pos, end, draw_robot=False)
+            # draw_env_path(path, screen, robot.pos, end, draw_robot=True)
             drawSpline(spl, screen)
             # draw_local_goal(screen, local_goal)
             env.draw(screen, mode="boundary")
