@@ -270,7 +270,7 @@ def main(algorithm, scenario, test_map, interactive=True):
 
             draw_path(past_path, screen, YELLOW)
             # draw_path(local_path, screen, BLUE)
-            # draw_env_path(path, screen, robot.pos, end, draw_robot=False)
+            # draw_env_path(path, screen, robot.pos, end, draw_robot=True)
             drawSpline(spl, screen)
             # draw_local_goal(screen, local_goal)
             env.draw(screen, mode="boundary")
