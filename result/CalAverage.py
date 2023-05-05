@@ -9,6 +9,6 @@ for algorithm in algorithms:
     df = df.drop(['Time', 'Err'], axis=1)
     df['Map'] = df['Map'].transform(lambda x: x[:-1])
     df.to_excel(scenario + '.xlsx', sheet_name=algorithm)
-    df.loc[len(df.index)] = ['Sum', df['Length'].sum(), df['Smoothness'].sum()]
+    df.loc[len(df.index)] = ['Mean', df['Length'].mean(), df['Smoothness'].mean()]
     df.loc[len(df.index)] = ['Std', df['Length'].std(), df['Smoothness'].std()]
     df.to_excel(scenario + '.xlsx', sheet_name=algorithm)
