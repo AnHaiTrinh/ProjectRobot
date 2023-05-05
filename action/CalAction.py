@@ -9,5 +9,4 @@ algorithms = os.listdir(scenario)
 for algorithm in algorithms:
     df = pd.read_csv(scenario + '/' + algorithm, sep=' ', names=['Map', 'Action', 'Time'])
     res = df.groupby(['Map', 'Action']).mean()
-    print(algorithm)
-    print(res)
+    res.to_excel('output.xlsx', sheet_name=scenario)
