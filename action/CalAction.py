@@ -15,8 +15,7 @@ for algorithm in algorithms:
     df = df.groupby(['Map', 'Action']).aggregate(['sum', 'mean'])
     df = df.reindex(index, fill_value=0)
     df.to_excel(scenario + '.xlsx', sheet_name=algorithm)
-    res = df.groupby(['Map', 'Action']).aggregate(['mean', 'sum'])
-    result.append(res)
+    result.append(df)
     # res.to_excel(writer, sheet_name=algorithm)
 
 with pd.ExcelWriter(scenario + ".xlsx") as writer:
