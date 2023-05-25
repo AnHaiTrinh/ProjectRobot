@@ -123,10 +123,10 @@ class FuzzyDecisionMaking(DecisionMaking):
             dpLC = (deltaphi - self.DELTAPHI_LCU) / (self.DELTAPHI_ULC - self.DELTAPHI_LCU)
         elif self.DELTAPHI_LCU > deltaphi > self.DELTAPHI_LCC:
             dpLC = 1
-        elif self.DELTAPHI_LCC >= deltaphi >= -7:
+        elif self.DELTAPHI_LCC >= deltaphi >= self.DELTAPHI_C:
             dpLC = (self.DELTAPHI_LCC - deltaphi) / (self.DELTAPHI_LCC - self.DELTAPHI_C)
             dpC = (deltaphi - self.DELTAPHI_C) / (self.DELTAPHI_LCC - self.DELTAPHI_C)
-        elif -7 > deltaphi:
+        elif self.DELTAPHI_C > deltaphi:
             dpC = 1
         m = max(dpA, dpLA, dpU, dpLC, dpC)
         if m == dpA:
