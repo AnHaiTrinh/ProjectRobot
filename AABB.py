@@ -1,11 +1,6 @@
 import pygame
 import numpy as np
-
-# Set up the colors.
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-WHITE = (255, 255, 255)
-
+from Colors import *
 
 class AABB:
     def __init__(self, x, y, width, height):
@@ -62,8 +57,13 @@ class Obstacle(AABB):
             self.v = np.array([0, 0])
         self.x_bound = (x - x_bound[0], x + x_bound[1])
         self.y_bound = (y - y_bound[0], y + y_bound[1])
+        self.counter = 0
+        self.history = []
 
-    def draw(self, window):
+    def draw(self, window, with_past=True):
+        if with_past:
+            for pos_x, pos_y in self.history[-5:]:
+                pygame.draw.rect(window, GREY, (pos_x - self.width / 2, pos_y - self.height / 2, self.width, self.height))
         pygame.draw.rect(window, BLACK, (self.x - self.width / 2, self.y - self.height / 2, self.width, self.height))
 
     def move(self):
@@ -83,6 +83,9 @@ class Obstacle(AABB):
             elif self.y > self.y_bound[1]:
                 self.y = self.y_bound[1]
                 self.v = (v_x, -v_y)
+        # self.counter += 1
+        # if self.counter % 2 == 0:
+        self.history.append((self.x, self.y))
 
     def __str__(self):
         return f"Obstacle({self.x}, {self.y}, {self.width}, {self.height}, {self.static}, [{self.v[0]}, {self.v[1]}])"

@@ -62,6 +62,7 @@ def main(algorithm, scenario, test_map, interactive=True):
     env = None
     path = None
     past_path = []
+    old_spl = None
     spl = None
     targets = 0
     collision = False
@@ -180,6 +181,7 @@ def main(algorithm, scenario, test_map, interactive=True):
 
                 # print(decision)
                 if decision == "Replan":
+                    old_spl = copy.deepcopy(spl)
                     replan_start = time.time()
                     if planning_algo == 'Astar':
                         build_start = time.time()
@@ -268,10 +270,11 @@ def main(algorithm, scenario, test_map, interactive=True):
                     local_goal = end
                 patience += 1
 
-            draw_path(past_path, screen, YELLOW)
-            # draw_path(local_path, screen, BLUE)
+            # Draw path
+            drawSpline(old_spl, screen, DARK_GREY)
+            draw_path(past_path, screen, GREEN)
             # draw_env_path(path, screen, robot.pos, end, draw_robot=True)
-            drawSpline(spl, screen)
+            drawSpline(spl, screen, YELLOW)
             # draw_local_goal(screen, local_goal)
             env.draw(screen, mode="boundary")
             draw_target(screen, (end[0] - 10, end[1] - 64))
@@ -282,6 +285,7 @@ def main(algorithm, scenario, test_map, interactive=True):
         pygame.display.update()
 
     end_time = time.time()
+
 
     with open("result/" + scenario + "/" + algorithm, "a") as f:
         d = 0
@@ -302,7 +306,10 @@ def main(algorithm, scenario, test_map, interactive=True):
 
 
 if __name__ == '__main__':
-    s = input('Enter scenario: ')
-    algo = input('Enter algorithm: ')
-    input_map = input('Enter map number: ')
+    # One of: [dense, maze, room, trap]
+    s = 'dense' #input('Enter scenario: ')
+    # One of: [Quad_Dstar_Tree, grid, Astar, OnlyReplan]
+    algo = 'Quad_Dstar_Tree' #input('Enter algorithm: ')
+    # From 1 to 20
+    input_map = '6' #input('Enter map number: ')
     main(algo, s, s + input_map)
