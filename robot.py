@@ -23,7 +23,7 @@ class Robot:
                              (self.pos[0] - self.r / 2, self.pos[1] - self.r / 2, self.r, self.r),
                              2)
         # draw the robot
-        pygame.draw.circle(window, RED, self.pos, 2, 0)
+        pygame.draw.circle(window, RED, self.pos, 6, 0)
         
     def reach(self, goal, epsilon=8):
         robotX, robotY = self.pos
