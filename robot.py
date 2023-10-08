@@ -15,15 +15,16 @@ class Robot:
     #     obstacles = self.detect(obs)
     #     self.pos = tuple(PSO(50, 50, self.pos, goal, obstacles=obstacles))
 
-    def draw(self, window, draw_sr=False):
+    def draw(self, window, draw_sr=True):
         if draw_sr:
             # draw the sensor range
-            pygame.draw.rect(window,
-                             LIGHT_BLUE,
-                             (self.pos[0] - self.r / 2, self.pos[1] - self.r / 2, self.r, self.r),
-                             2)
+            pygame.draw.circle(window,
+                             RED,
+                             self.pos,
+                             self.r,
+                             1)
         # draw the robot
-        pygame.draw.circle(window, RED, self.pos, 6, 0)
+        pygame.draw.circle(window, RED, self.pos, 8, 0)
         
     def reach(self, goal, epsilon=8):
         robotX, robotY = self.pos
@@ -62,16 +63,14 @@ class Robot:
     def detect(self, obstacles_list):
         obstacles = []
         for obstacle in obstacles_list:
+            intersect = False
             x1, x2, y1, y2 = obstacle.return_coordinate()
-            top_left_x = max(x1, self.pos[0] - self.r)
-            top_left_y = max(y1, self.pos[1] - self.r)
-            bottom_right_x = min(x2, self.pos[0] + self.r)
-            bottom_right_y = min(y2, self.pos[1] + self.r)
-            dx = max(0, bottom_right_x - top_left_x)
-            dy = max(0, bottom_right_y - top_left_y)
-            if dx and dy:
-                # x = (bottom_right_x + top_left_x) / 2
-                # y = (bottom_right_y + top_left_y) / 2
+            for x in (x1, x2):
+                for y in (y1, y2):
+                    dist = (x - self.pos[0]) ** 2 + (y - self.pos[1]) ** 2
+                    if dist <= self.r ** 2:
+                        intersect = True
+            if intersect:
                 obstacles.append(obstacle)
         return obstacles
 

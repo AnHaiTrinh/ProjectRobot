@@ -64,7 +64,8 @@ class Obstacle(AABB):
         if with_past:
             for pos_x, pos_y in self.history[-5:]:
                 pygame.draw.rect(window, GREY, (pos_x - self.width / 2, pos_y - self.height / 2, self.width, self.height))
-        pygame.draw.rect(window, BLACK, (self.x - self.width / 2, self.y - self.height / 2, self.width, self.height))
+        color = BLACK if self.static else CYAN
+        pygame.draw.rect(window, color, (self.x - self.width / 2, self.y - self.height / 2, self.width, self.height))
 
     def move(self):
         if not self.static:

@@ -7,7 +7,7 @@ from pygame.locals import *
 from sortedcontainers import SortedList
 from Env import QuadTreeEnvironment, GridEnvironment
 from robot import Robot
-from PathManipulation import makeSpline, drawSpline, draw_path, draw_target
+from PathManipulation import makeSpline, drawSpline, draw_path, draw_target, draw_start
 from Colors import *
 from Solver import DStarLiteSolver, AStarSolver
 from DecisionMaking import FuzzyDecisionMaking, OnlyReplanDecision
@@ -180,6 +180,7 @@ def main(algorithm, scenario, test_map, interactive=True):
                         print(f"{i.x} {i.width} {i.y} {i.height} {robotX} {robotY}")
 
                 # print(decision)
+
                 if decision == "Replan":
                     old_spl = copy.deepcopy(spl)
                     replan_start = time.time()
@@ -277,6 +278,7 @@ def main(algorithm, scenario, test_map, interactive=True):
             drawSpline(spl, screen, YELLOW)
             # draw_local_goal(screen, local_goal)
             env.draw(screen, mode="boundary")
+            draw_start(screen, begin)
             draw_target(screen, (end[0] - 10, end[1] - 64))
             robot.draw(screen)
             if robot.reach(end):
@@ -307,9 +309,9 @@ def main(algorithm, scenario, test_map, interactive=True):
 
 if __name__ == '__main__':
     # One of: [dense, maze, room, trap]
-    s = 'dense' #input('Enter scenario: ')
+    s = 'real' #input('Enter scenario: ')
     # One of: [Quad_Dstar_Tree, grid, Astar, OnlyReplan]
     algo = 'Quad_Dstar_Tree' #input('Enter algorithm: ')
     # From 1 to 20
-    input_map = '6' #input('Enter map number: ')
+    input_map = '7' #input('Enter map number: ')
     main(algo, s, s + input_map)

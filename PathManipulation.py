@@ -78,6 +78,8 @@ def draw_target(window, target):
     target_img = pygame.image.load('flag.png')
     window.blit(target_img, target)
 
+def draw_start(window, start):
+    pygame.draw.circle(window, GREEN, start, 6, 0)
 
 def draw_local_goal(window, local_goal):
     pygame.draw.circle(window, (255, 0, 0), local_goal, 2.5)
