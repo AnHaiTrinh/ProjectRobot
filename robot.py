@@ -63,14 +63,11 @@ class Robot:
     def detect(self, obstacles_list):
         obstacles = []
         for obstacle in obstacles_list:
-            intersect = False
             x1, x2, y1, y2 = obstacle.return_coordinate()
-            for x in (x1, x2):
-                for y in (y1, y2):
-                    dist = (x - self.pos[0]) ** 2 + (y - self.pos[1]) ** 2
-                    if dist <= self.r ** 2:
-                        intersect = True
-            if intersect:
+            closest_x = max(x1, min(self.pos[0], x2))
+            closest_y = max(y1, min(self.pos[1], y2))
+            distance = (closest_x - self.pos[0]) ** 2 + (closest_y - self.pos[1]) ** 2
+            if distance <= self.r ** 2:
                 obstacles.append(obstacle)
         return obstacles
 
